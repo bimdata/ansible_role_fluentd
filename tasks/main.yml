@@ -1,0 +1,73 @@
+---
+- name: "Install Fluentd prerequisites."
+  apt:
+    name: "{{ fluentd_prerequisites }}"
+    state: present
+
+- name: "Add Fluentd key."
+  apt_key:
+    url: "{{ fluentd_apt_key_url }}"
+    state: present
+
+- name: "Add Fluentd repository."
+  apt_repository:
+    repo: "deb {{ fluentd_apt_repos_url }} contrib"
+    update_cache: True
+    filename: fluentd
+    state: present
+
+- name: "Install Fluentd."
+  apt:
+    name: "{{ fluentd_pkg_name }}{% if fluentd_version is defined %}={{ fluentd_version }}{% endif %}"
+    cache_valid_time: 3600
+    state: present
+
+- name: "Install Fluentd plugins."
+  gem:
+    name: "{{ item.name }}"
+    executable: "{{ fluentd_gem_exec_path }}"
+    user_install: False
+    version: "{{ item.version | default(omit) }}"
+    state: present
+  loop: "{{ fluentd_plugins }}"
+  notify: "Restart Fluentd."
+
+- name: "Enable Fluentd service."
+  service:
+    name: "{{ fluentd_svc_name }}"
+    enabled: True
+
+- name: "Create Fluentd configuration directory."
+  file:
+    path: "{{ fluentd_conf_dir }}"
+    state: directory
+
+- name: "Create main Fluentd configuration."
+  template:
+    src: td-agent.conf.j2
+    dest: /etc/td-agent/td-agent.conf
+  notify: "Restart Fluentd."
+
+- name: "Create sources Fluentd configuration."
+  template:
+    src: sources.conf.j2
+    dest: "{{ fluentd_conf_dir }}/0-sources.conf"
+  notify: "Restart Fluentd."
+
+- name: "Create filters Fluentd configuration."
+  template:
+    src: filters.conf.j2
+    dest: "{{ fluentd_conf_dir }}/5-filters.conf"
+  notify: "Restart Fluentd."
+
+- name: "Create labels Fluentd configuration."
+  template:
+    src: labels.conf.j2
+    dest: "{{ fluentd_conf_dir }}/5-labels.conf"
+  notify: "Restart Fluentd."
+
+- name: "Create matches Fluentd configuration."
+  template:
+    src: matches.conf.j2
+    dest: "{{ fluentd_conf_dir }}/9-matches.conf"
+  notify: "Restart Fluentd."

@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+
+{% if fluentd_system is defined and fluentd_system | length > 0%}
+<system>
+{% for key, value in fluentd_system.items() %}
+  {{ key }} {{ value }}
+{% endfor %}
+</system>
+{% endif %}
+
+@include {{ fluentd_conf_dir }}*.conf

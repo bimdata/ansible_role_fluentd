@@ -1,0 +1,14 @@
+{{ ansible_managed | comment }}
+
+{% from "macros.j2" import build_conf with context -%}
+
+{% for match in fluentd_matches %}
+<match{% if match._section_args is defined %} {{ match._section_args }}{% endif %}>
+{% for key, value in match.items() %}
+{% if key != "_section_args" %}
+{{ build_conf(key, value, 1) }}
+{% endif %}
+{% endfor %}
+</match>
+
+{% endfor -%}

@@ -1,0 +1,26 @@
+{% macro _indent(indent_value) %}
+{% for n in range(indent_value) %}  {% endfor %}
+{% endmacro -%}
+
+{% macro build_conf(name, value, indent_value) %}
+{% if value is mapping %}
+{{ _indent(indent_value) }}<{{ name | regex_replace ('^[0-9]+__', '') }}{% if value._section_args is defined %} {{ value._section_args }}{% endif -%}>
+{% for _key, _value in value.items() %}
+{%- if _key != "_section_args" %}
+{{ build_conf(_key, _value, indent_value + 1) }}
+{% endif -%}
+{% endfor %}
+{{ _indent(indent_value) }}</{{ name | regex_replace ('^[0-9]+__', '') }}>
+{%- else %}
+{% if name == "type" %}
+  {%- set name = "@type" %}
+{% elif name == "id" %}
+  {%- set name = "@id" %}
+{% elif name == "label" %}
+  {%- set name = "@label" %}
+{% elif name == "log_level" %}
+  {%- set name = "@log_level" %}
+{%- endif %}
+{{ _indent(indent_value) }}{{ name }} {{ value }}
+{%- endif %}
+{% endmacro %}
