@@ -5,22 +5,19 @@ fluentd_prerequisites:
   - gnupg
 
 fluentd_major_version: 4
-# fluentd_version: 4.0.0
 
 fluentd_apt_key_url: "https://packages.treasuredata.com/GPG-KEY-td-agent"
 fluentd_apt_repos_url: "https://packages.treasuredata.com/{{ fluentd_major_version }}/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}/ {{ ansible_distribution_release | lower }}"
 fluentd_pkg_name: "td-agent"
 fluentd_svc_name: "td-agent"
-fluentd_conf_dir: /etc/td-agent/conf.d/
 
 fluentd_gem_exec_path: /usr/sbin/td-agent-gem
 fluentd_plugins: []
 
-fluentd_system:
-  log_level: info
-  workers: 1
+fluentd_system: {}
 
-fluentd_sources: []
-fluentd_filters: []
-fluentd_labels: []
-fluentd_matches: []
+# Log processing
+_fluentd_sources: "{{ lookup('template', './lookup/get_sources.j2') }}"
+_fluentd_filters: "{{ lookup('template', './lookup/get_filters.j2') }}"
+_fluentd_labels: "{{ lookup('template', './lookup/get_labels.j2') }}"
+_fluentd_matches: "{{ lookup('template', './lookup/get_matches.j2') }}"

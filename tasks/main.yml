@@ -41,33 +41,12 @@
   file:
     path: "{{ fluentd_conf_dir }}"
     state: directory
+    mode: 0640
+  when: fluentd_conf_dir is defined
 
 - name: "Create main Fluentd configuration."
   template:
     src: td-agent.conf.j2
     dest: /etc/td-agent/td-agent.conf
-  notify: "Restart Fluentd."
-
-- name: "Create sources Fluentd configuration."
-  template:
-    src: sources.conf.j2
-    dest: "{{ fluentd_conf_dir }}/0-sources.conf"
-  notify: "Restart Fluentd."
-
-- name: "Create filters Fluentd configuration."
-  template:
-    src: filters.conf.j2
-    dest: "{{ fluentd_conf_dir }}/5-filters.conf"
-  notify: "Restart Fluentd."
-
-- name: "Create labels Fluentd configuration."
-  template:
-    src: labels.conf.j2
-    dest: "{{ fluentd_conf_dir }}/5-labels.conf"
-  notify: "Restart Fluentd."
-
-- name: "Create matches Fluentd configuration."
-  template:
-    src: matches.conf.j2
-    dest: "{{ fluentd_conf_dir }}/9-matches.conf"
+    mode: 0640
   notify: "Restart Fluentd."

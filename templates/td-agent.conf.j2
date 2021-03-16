@@ -1,4 +1,5 @@
 {{ ansible_managed | comment }}
+{% from "macros/build_conf.j2" import build_conf with context -%}
 
 {% if fluentd_system is defined and fluentd_system | length > 0%}
 <system>
@@ -8,4 +9,44 @@
 </system>
 {% endif %}
 
+{% for _source in _fluentd_sources %}
+<source>
+{% for key, value in _source.items() %}
+{{ build_conf(key, value, 1) }}
+{% endfor %}
+</source>
+{% endfor %}
+
+{% for _filter in _fluentd_filters %}
+<filter{% if _filter._section_args is defined %} {{ _filter._section_args }}{% endif %}>
+{% for key, value in _filter.items() %}
+{% if key != "_section_args" %}
+{{ build_conf(key, value, 1) }}
+{% endif %}
+{% endfor %}
+</filter>
+{% endfor %}
+
+{% for _match in _fluentd_matches %}
+<match{% if _match._section_args is defined %} {{ _match._section_args }}{% endif %}>
+{% for key, value in _match.items() %}
+{% if key != "_section_args" %}
+{{ build_conf(key, value, 1) }}
+{% endif %}
+{% endfor %}
+</match>
+{% endfor %}
+
+{% for _label in _fluentd_labels %}
+<label @{{ _label.name }}>
+{% for key, value in _label.items() %}
+{% if key != "name" %}
+{{ build_conf(key, value, 1) }}
+{% endif %}
+{% endfor %}
+</label>
+{% endfor %}
+
+{% if fluentd_conf_dir is defined %}
 @include {{ fluentd_conf_dir }}*.conf
+{% endif %}
