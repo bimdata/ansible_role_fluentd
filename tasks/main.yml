@@ -41,7 +41,7 @@
   file:
     path: "{{ fluentd_conf_dir }}"
     state: directory
-    mode: 0640
+    mode: 0750
   when: fluentd_conf_dir is defined
 
 - name: "Create main Fluentd configuration."
