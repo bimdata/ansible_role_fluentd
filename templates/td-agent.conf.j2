@@ -1,5 +1,5 @@
 {{ ansible_managed | comment }}
-{% from "macros/build_conf.j2" import build_conf with context -%}
+{% from "build_conf.j2" import build_conf with context -%}
 
 {% if fluentd_system is defined and fluentd_system | length > 0%}
 <system>
