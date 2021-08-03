@@ -17,7 +17,7 @@ fluentd_plugins: []
 fluentd_system: {}
 
 # Log processing
-_fluentd_sources: "{{ lookup('template', './lookup/get_sources.j2') }}"
-_fluentd_filters: "{{ lookup('template', './lookup/get_filters.j2') }}"
-_fluentd_labels: "{{ lookup('template', './lookup/get_labels.j2') }}"
-_fluentd_matches: "{{ lookup('template', './lookup/get_matches.j2') }}"
+_fluentd_sources: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='source')) }}"
+_fluentd_filters: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='filter')) }}"
+_fluentd_labels: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='label')) }}"
+_fluentd_matches: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='match')) }}"
