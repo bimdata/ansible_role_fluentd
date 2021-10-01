@@ -16,11 +16,30 @@
     filename: fluentd
     state: present
 
+- name: "Get installed Fluentd version."
+  command: dpkg-query --showformat='${Version}' --show {{ fluentd_pkg_name }}
+  register: fluentd_pkg_installed_version
+  failed_when: False
+  changed_when: False
+  check_mode: no
+
+- name: "Unhold Fluentd version."
+  dpkg_selections:
+    name: "{{ fluentd_pkg_name }}"
+    selection: install
+  when: not fluentd_pkg_version_hold or (fluentd_pkg_installed_version.stdout and fluentd_pkg_installed_version.stdout != fluentd_pkg_version)
+
 - name: "Install Fluentd."
   apt:
-    name: "{{ fluentd_pkg_name }}{% if fluentd_version is defined %}={{ fluentd_version }}{% endif %}"
+    name: "{{ fluentd_pkg_name }}{% if fluentd_pkg_version is defined and fluentd_pkg_version != '' %}={{ fluentd_pkg_version }}{% endif %}"
     cache_valid_time: 3600
     state: present
+
+- name: "Hold Fluentd version."
+  dpkg_selections:
+    name: "{{ fluentd_pkg_name }}"
+    selection: "hold"
+  when: fluentd_pkg_version_hold
 
 - name: "Install Fluentd plugins."
   gem:
@@ -49,4 +68,6 @@
     src: td-agent.conf.j2
     dest: /etc/td-agent/td-agent.conf
     mode: 0640
+    owner: td-agent
+    group: td-agent
   notify: "Restart Fluentd."
