@@ -1,0 +1,50 @@
+---
+- name: "Cleanup legacy apt configuration."
+  when: fluentd_apt_cleanup_legacy | bool
+  block:
+    - name: "Cleanup legacy key in main keyring if needed."
+      ansible.builtin.apt_key:
+        id: "{{ fluentd_apt_key_legacy_id }}"
+        state: absent
+    - name: "Cleanup legacy Fluentd repository definition."
+      ansible.builtin.apt_repository:
+        repo: "deb {{ fluentd_apt_repos_url }}/ {{ ansible_distribution_release | lower }} contrib"
+        update_cache: true
+        filename: fluentd
+        state: absent
+      loop:
+        - 4
+        - 5
+      vars:
+        fluentd_major_version: "{{ item }}"
+# End of block
+
+- name: "Cleanup legacy naming configuration."
+  when: fluentd_naming_cleanup_legacy | bool
+  block:
+    - name: "Get services facts."
+      ansible.builtin.service_facts:
+
+    - name: "Stop and disable legacy service."
+      ansible.builtin.service:
+        name: "{{ fluentd_svc_name_legacy }}"
+        state: stopped
+        enabled: false
+      when: fluentd_svc_name_legacy in services
+
+    - name: "Unhold legacy version."
+      ansible.builtin.dpkg_selections:
+        name: "{{ fluentd_pkg_name_legacy }}"
+        selection: deinstall
+
+    - name: "Uninstall Legacy version."
+      ansible.builtin.apt:
+        name: "{{ fluentd_pkg_name_legacy }}"
+        state: absent
+        clean: true
+        purge: true
+
+    - name: "Remove legacy configuration."
+      ansible.builtin.file:
+        path: "{{ fluentd_conf_directory_legacy }}"
+        state: absent

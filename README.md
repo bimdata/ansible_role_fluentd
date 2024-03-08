@@ -18,26 +18,40 @@ https://docs.fluentd.org/).
 
 Variables used for the installation:
 
-| Variables                | Default value                               | Description                                               |
-|--------------------------|---------------------------------------------|-----------------------------------------------------------|
-| fluentd_prerequisites    | ['apt-transport-https', 'curl', 'gnupg']    | List of package that need to be installed before Fluentd. |
-| fluentd_major_version    |4                                            | Major version of Fluentd you want to install.             |
-| fluentd_apt_key_url      | https://packages.treasuredata.com/GPG-KEY-td-agent | The APT key for the Fluentd package.               |
-| fluentd_apt_repos_url    | "https://packages.treasuredata.com/{{ fluentd_major_version }}/{{ ansible_distribution \| lower }}/{{ ansible_distribution_release \| lower }}/ {{ ansible_distribution_release  \| lower }}" | The APT repository address needed to install Fluentd. |
-| fluentd_pkg_name         | td-agent                                    | The Fluentd APT package name.                             |
-| fluentd_pkg_version:     | ""                                          | Install a specific version of the package.                |
-| fluentd_pkg_version_hold | "{{ fluentd_pkg_version \| default(False) \| ternary(True, False) }}" | Lock package version to prevent accidental update. By default, `True` if `fluentd_pkg_version` is defined, `False` otherwise. |
-| fluentd_svc_name         | td-agent                                    | The Fluentd service name to start/stop the daemon.        |
-| fluentd_version          | *Undefined*                                 | Fluentd version you want to install (can be "{{ fluentd_major_version }}.1.*" for example.) |
+| Variables                    | Default value                                      | Description                                               |
+|--------------------------|--------------------------------------------------------|-----------------------------------------------------------|
+| fluentd_prerequisites        | ['apt-transport-https', 'curl', 'gnupg']           | List of package that need to be installed before Fluentd. |
+| fluentd_major_version        | 5                                                  | Major version of Fluentd you want to install.             |
+| fluentd_apt_key_url          | https://packages.treasuredata.com/GPG-KEY-td-agent | The APT key for the Fluentd package.                      |
+| fluentd_apt_repos_url        | "https://packages.treasuredata.com/{{ fluentd_major_version }}/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}" | The APT repository address needed to install Fluentd.     |
+| fluentd_apt_repos_suites     | "{{ ansible_distribution_release \| lower }}"      | The APT repos suites.                                     |
+| fluentd_apt_repos_components | ['contrib']                                        | The APT repos components.                                 |
+| fluentd_pkg_name             | fluent-package                                     | The Fluentd APT package name.                             |
+| fluentd_pkg_version:         | ""                                                 | Install a specific version of the package.                |
+| fluentd_pkg_version_hold     | "{{ fluentd_pkg_version \| default(False) \| ternary(True, False) }}" | Lock package version to prevent accidental update. By default, `True` if `fluentd_pkg_version` is defined, `False` otherwise. |
+| fluentd_svc_name             | fluentd                                            | The Fluentd service name to start/stop the daemon.        |
+
+Variables used to remove legacy stuff (for example if install before the renaming td-agent -> fluentd)
+
+| Variables                     | Default value                            | Description                                           |
+|-------------------------------|------------------------------------------|-------------------------------------------------------|
+| fluentd_apt_cleanup_legacy    | false                                    | Remove old keys and old APT sources if true.          |
+| fluentd_apt_key_legacy_id     | BEE682289B2217F45AF4CC3F901F9177AB97ACBE | ID of the old GPG key to remove from keyring.         |
+| fluentd_naming_cleanup_legacy | false                                    | Remove old service / conf / apt with td-agent name.   | 
+| fluentd_pkg_name_legacy       | td-agent                                 | Pkg name that will be remove by legacy cleaner.       |
+| fluentd_svc_name_legacy       | td-agent                                 | Service name that will be remove by legacy cleaner.   |
+| fluentd_conf_directory_legacy | /etc/td-agent/                           | Conf directory that will be remove by legacy cleaner. |
 
 Variables used for the general configuration:
 
-| Variables               | Default value           | Description                                               |
-|-------------------------|-------------------------|-----------------------------------------------------------|
-| fluentd_plugins         | []                      | List of plugins to install.                               |
-| fluentd_gem_exec_path   | /usr/sbin/td-agent-gem  | Gem binary path to install fluentd plugins.               |
-| fluentd_system          | {}                      | fluentd system configuration.                             |
-| fluentd_conf_dir        | *Undefined*             | Can be use to include other configuration files. It will add `@include {{ fluentd_conf_dir }}*.conf` in the conf. |
+| Variables                 | Default value           | Description                                               |
+|---------------------------|-------------------------|-----------------------------------------------------------|
+| fluentd_plugins           | []                      | List of plugins to install.                               |
+| fluentd_gem_exec_path     | /usr/sbin/fluent-gem    | Gem binary path to install fluentd plugins.               |
+| fluentd_system            | {}                      | fluentd system configuration.                             |
+| fluentd_conf_directory    | "/etc/fluent"           | Fluentd configuration directory.                          |
+| fluentd_conf_file_path    | "{{ fluentd_conf_directory }}/fluentd.conf" | Fluentd configuration file path.      |
+| fluentd_include_directory | *Undefined*             | Can be use to include other configuration files. It will add `@include {{ fluentd_include_directory }}*.conf` in the conf. |
 
 For `fluentd_system`, each key is used as a configuration option name and values as values.
 You can see all the avaible options in the [Fluentd documentation](https://docs.fluentd.org/deployment/system-config)
