@@ -1,5 +1,4 @@
 galaxy_info:
-  standalone: true
   role_name: fluentd
   author: Romain
   description: This role installs and configures Fluentd.
@@ -9,8 +8,8 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-        - Bullseye
-        - Bookworm
+        - bullseye
+        - bookworm
   galaxy_tags:
     - fluentd
     - tdagent

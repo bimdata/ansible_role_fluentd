@@ -1,5 +1,5 @@
 ---
 - name: "Restart Fluentd."
-  service:
+  ansible.builtin.service:
     name: "{{ fluentd_svc_name }}"
     state: restarted
