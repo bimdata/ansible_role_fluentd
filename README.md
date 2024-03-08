@@ -6,7 +6,7 @@ This role installs and configures Fluentd.
 Requirements
 ------------
 
-* This role is only tested on Debian 10.x (Buster).
+* This role is only tested on Debian 12.x (Bookworm).
 
 Role Variables
 --------------
