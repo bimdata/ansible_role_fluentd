@@ -47,6 +47,6 @@
 </label>
 {% endfor %}
 
-{% if fluentd_conf_dir is defined %}
-@include {{ fluentd_conf_dir }}*.conf
+{% if fluentd_include_directory is defined %}
+@include {{ fluentd_include_directory }}*.conf
 {% endif %}

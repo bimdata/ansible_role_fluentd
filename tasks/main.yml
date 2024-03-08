@@ -1,73 +1,75 @@
 ---
 - name: "Install Fluentd prerequisites."
-  apt:
+  ansible.builtin.apt:
     name: "{{ fluentd_prerequisites }}"
     state: present
 
-- name: "Add Fluentd key."
-  apt_key:
-    url: "{{ fluentd_apt_key_url }}"
-    state: present
+- name: "Import tasks needed to cleanup legacy stuff."
+  ansible.builtin.import_tasks: cleanup.yml
 
 - name: "Add Fluentd repository."
-  apt_repository:
-    repo: "deb {{ fluentd_apt_repos_url }} contrib"
-    update_cache: True
-    filename: fluentd
+  ansible.builtin.deb822_repository:
+    name: fluentd
+    types: [deb]
+    uris: "{{ fluentd_apt_repos_url }}"
+    suites: "{{ fluentd_apt_repos_suites }}"
+    components: "{{ fluentd_apt_repos_components }}"
+    signed_by: "{{ fluentd_apt_key_url }}"
     state: present
+    enabled: true
 
 - name: "Get installed Fluentd version."
-  command: dpkg-query --showformat='${Version}' --show {{ fluentd_pkg_name }}
+  ansible.builtin.command: dpkg-query --showformat='${Version}' --show {{ fluentd_pkg_name }}
   register: fluentd_pkg_installed_version
-  failed_when: False
-  changed_when: False
-  check_mode: no
+  failed_when: false
+  changed_when: false
+  check_mode: false
 
 - name: "Unhold Fluentd version."
-  dpkg_selections:
+  ansible.builtin.dpkg_selections:
     name: "{{ fluentd_pkg_name }}"
     selection: install
   when: not fluentd_pkg_version_hold or (fluentd_pkg_installed_version.stdout and fluentd_pkg_installed_version.stdout != fluentd_pkg_version)
 
 - name: "Install Fluentd."
-  apt:
+  ansible.builtin.apt:
     name: "{{ fluentd_pkg_name }}{% if fluentd_pkg_version is defined and fluentd_pkg_version != '' %}={{ fluentd_pkg_version }}{% endif %}"
     cache_valid_time: 3600
     state: present
 
 - name: "Hold Fluentd version."
-  dpkg_selections:
+  ansible.builtin.dpkg_selections:
     name: "{{ fluentd_pkg_name }}"
     selection: "hold"
   when: fluentd_pkg_version_hold
 
 - name: "Install Fluentd plugins."
-  gem:
+  community.general.gem:
     name: "{{ item.name }}"
     executable: "{{ fluentd_gem_exec_path }}"
-    user_install: False
+    user_install: false
     version: "{{ item.version | default(omit) }}"
     state: present
   loop: "{{ fluentd_plugins }}"
   notify: "Restart Fluentd."
 
 - name: "Enable Fluentd service."
-  service:
+  ansible.builtin.service:
     name: "{{ fluentd_svc_name }}"
-    enabled: True
+    enabled: true
 
 - name: "Create Fluentd configuration directory."
-  file:
-    path: "{{ fluentd_conf_dir }}"
+  ansible.builtin.file:
+    path: "{{ fluentd_include_directory }}"
     state: directory
-    mode: 0750
-  when: fluentd_conf_dir is defined
+    mode: "0750"
+  when: fluentd_include_directory is defined
 
 - name: "Create main Fluentd configuration."
-  template:
-    src: td-agent.conf.j2
-    dest: /etc/td-agent/td-agent.conf
-    mode: 0640
-    owner: td-agent
-    group: td-agent
+  ansible.builtin.template:
+    src: fluentd.conf.j2
+    dest: "{{ fluentd_conf_file_path }}"
+    mode: "0640"
+    owner: _fluentd
+    group: _fluentd
   notify: "Restart Fluentd."

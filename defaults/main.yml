@@ -4,16 +4,34 @@ fluentd_prerequisites:
   - curl
   - gnupg
 
-fluentd_major_version: 4
+fluentd_major_version: 5
 
+# Key will be updated soon: https://packages.treasuredata.com/
+# fluentd_apt_key_url: "https://packages.treasuredata.com/GPG-KEY-fluent-package"
 fluentd_apt_key_url: "https://packages.treasuredata.com/GPG-KEY-td-agent"
-fluentd_apt_repos_url: "https://packages.treasuredata.com/{{ fluentd_major_version }}/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}/ {{ ansible_distribution_release | lower }}"
-fluentd_pkg_name: "td-agent"
+fluentd_apt_repos_url: "https://packages.treasuredata.com/{{ fluentd_major_version }}/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}"
+fluentd_apt_repos_suites: "{{ ansible_distribution_release | lower }}"
+fluentd_apt_repos_components: ['contrib']
+
+fluentd_pkg_name: "fluent-package"
 fluentd_pkg_version: ""
 fluentd_pkg_version_hold: "{{ fluentd_pkg_version | default(False) | ternary(True, False) }}"
-fluentd_svc_name: "td-agent"
+fluentd_svc_name: "fluentd"
 
-fluentd_gem_exec_path: /usr/sbin/td-agent-gem
+# Legacy stuff
+fluentd_apt_cleanup_legacy: false
+fluentd_apt_key_legacy_id: "BEE682289B2217F45AF4CC3F901F9177AB97ACBE"
+
+fluentd_naming_cleanup_legacy: false
+fluentd_pkg_name_legacy: td-agent
+fluentd_svc_name_legacy: td-agent
+fluentd_conf_directory_legacy: /etc/td-agent/
+
+# Config
+fluentd_conf_directory: "/etc/fluent"
+fluentd_conf_file_path: "{{ fluentd_conf_directory }}/fluentd.conf"
+
+fluentd_gem_exec_path: /usr/sbin/fluent-gem
 fluentd_plugins: []
 
 fluentd_system: {}
